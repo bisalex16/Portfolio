@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Birhaneyesus Alemayehu | Multi-Disciplinary Designer & Developer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --brand-purple: #7e22ce;
+            --brand-glow: #c084fc;
+            --bg-dark: #0f051d;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: var(--bg-dark);
+            color: #f8fafc;
+            overflow-x: hidden;
+        }
+
+        .glow-box {
+            position: relative;
+            background: rgba(126, 34, 206, 0.03);
+            border: 1px solid rgba(192, 132, 252, 0.1);
+            transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+
+        .glow-box:hover {
+            border-color: var(--brand-glow);
+            box-shadow: 0 0 30px rgba(126, 34, 206, 0.3);
+            background: rgba(126, 34, 206, 0.08);
+            transform: translateY(-5px);
+        }
+
+        .gradient-text {
+            background: linear-gradient(135deg, #fff 30%, var(--brand-glow) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        canvas#canvas-webgl {
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        .custom-cursor {
+            width: 20px;
+            height: 20px;
+            border: 2px solid var(--brand-glow);
+            border-radius: 50%;
+            position: fixed;
+            pointer-events: none;
+            z-index: 9999;
+            transition: transform 0.1s ease;
+        }
+
+        nav {
+            backdrop-filter: blur(15px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        /* Profile Image Styles */
+        .profile-img {
+            transform: scaleX(-1);
+            transition: all 0.5s ease-out;
+        }
+        
+        /* Mobile specific circular profile */
+        @media (max-width: 1023px) {
+            .profile-wrapper {
+                width: 240px;
+                height: 240px;
+                border-radius: 50%;
+                border: 4px solid rgba(126, 34, 206, 0.3);
+                overflow: hidden;
+                box-shadow: 0 0 40px rgba(126, 34, 206, 0.2);
+            }
+        }
+
+        /* Desktop specific rectangular profile */
+        @media (min-width: 1024px) {
+            .profile-wrapper {
+                width: 420px;
+                height: 520px;
+                border-radius: 3rem;
+                border: 1px solid rgba(255, 255, 255, 0.1);
+                overflow: hidden;
+                box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            }
+        }
+
+        .animate-float {
+            animation: float 6s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+
+        .scroll-reveal {
+            opacity: 0;
+            transform: translateY(40px);
+        }
+
+        input, textarea {
+            background: rgba(255, 255, 255, 0.03) !important;
+            border: 1px solid rgba(192, 132, 252, 0.2) !important;
+            transition: all 0.3s ease;
+        }
+
+        input:focus, textarea:focus {
+            outline: none;
+            border-color: var(--brand-glow) !important;
+            background: rgba(126, 34, 206, 0.1) !important;
+            box-shadow: 0 0 15px rgba(126, 34, 206, 0.2);
+        }
+
+        .testimonial-card {
+            background: linear-gradient(145deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.01) 100%);
+            backdrop-filter: blur(10px);
+        }
+
+        .cert-container {
+            position: relative;
+            overflow: hidden;
+            border-radius: 1.5rem;
+            background: #1e1b4b;
+            aspect-ratio: 4/3;
+        }
+        .cert-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.6s ease;
+        }
+        .cert-container:hover img {
+            transform: scale(1.1);
+        }
+    </style>
+</head>
+<body>
+    <div class="custom-cursor hidden md:block" id="cursor"></div>
+    <canvas id="canvas-webgl"></canvas>
+
+    <!-- Navigation -->
+    <nav class="fixed w-full z-50 py-4 md:py-6">
+        <div class="max-w-7xl mx-auto px-6 flex justify-between items-center">
+            <div class="flex items-center gap-3 group cursor-pointer">
+                <div class="w-10 h-10 bg-purple-600 rounded-xl flex items-center justify-center font-bold text-white group-hover:rotate-12 transition-transform shadow-[0_0_15px_rgba(126,34,206,0.6)]">BA</div>
+                <span class="text-xl font-extrabold tracking-tighter uppercase">Bis <span class="text-purple-400 text-sm md:text-xl">design</span></span>
+            </div>
+            <div class="hidden md:flex gap-10 text-sm font-semibold uppercase tracking-widest">
+                <a href="#home" class="hover:text-purple-400 transition">Home</a>
+                <a href="#services" class="hover:text-purple-400 transition">Expertise</a>
+                <a href="#portfolio" class="hover:text-purple-400 transition">Work</a>
+                <a href="#contact" class="px-6 py-2 border border-purple-500/50 rounded-full hover:bg-purple-600 transition">Contact</a>
+            </div>
+            <a href="#contact" class="md:hidden text-xs font-bold uppercase tracking-widest text-purple-400">Hire Me</a>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section id="home" class="min-h-screen flex items-center relative px-6 pt-24 md:pt-0">
+        <div class="max-w-7xl mx-auto grid lg:grid-cols-2 gap-12 items-center w-full">
+            
+            <!-- Profile Column (Visible on Mobile) -->
+            <div class="lg:order-2 flex justify-center lg:justify-end">
+                <div class="profile-container animate-float relative z-10">
+                    <div class="profile-wrapper bg-gradient-to-br from-purple-900 to-black relative group">
+                        <img src="Img/Bis Suite.png" alt="Birhaneyesus Alemayehu" class="profile-img w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700" onerror="this.src='https://via.placeholder.com/800x1000/2e1065/ffffff?text=BIS+DESIGNER'">
+                        <div class="absolute inset-0 bg-gradient-to-t from-purple-900/40 to-transparent pointer-events-none"></div>
+                    </div>
+                    <!-- Decorative elements -->
+                    <div class="absolute -top-4 -right-4 md:-top-6 md:-right-6 w-24 h-24 md:w-32 md:h-32 border-2 border-purple-500/20 rounded-full animate-pulse"></div>
+                    <div class="absolute bottom-4 -left-4 md:bottom-10 md:-left-10 w-16 h-16 md:w-24 md:h-24 bg-purple-600/20 blur-3xl rounded-full"></div>
+                </div>
+            </div>
+
+            <!-- Content Column -->
+            <div class="hero-content lg:order-1 text-center lg:text-left">
+                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-500/10 border border-purple-500/20 text-purple-300 text-[10px] md:text-xs font-bold mb-6 uppercase tracking-widest">
+                    <span class="relative flex h-2 w-2">
+                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-purple-400 opacity-75"></span>
+                        <span class="relative inline-flex rounded-full h-2 w-2 bg-purple-500"></span>
+                    </span>
+                    Available for New Projects
+                </div>
+                <h1 class="text-4xl md:text-7xl font-extrabold leading-tight mb-4 md:mb-6">
+                    Hi, I’m <span class="gradient-text">Birhaneyesus Alemayehu</span>
+                </h1>
+                <h2 class="text-xl md:text-3xl font-semibold text-purple-300/90 mb-6 md:mb-8 italic">
+                    Graphic Designer + Video Editor
+                </h2>
+                <p class="text-base md:text-lg text-slate-400 max-w-lg mx-auto lg:mx-0 mb-10 leading-relaxed">
+                    I craft high-end visual identities, dynamic motion graphics, and robust digital products. From branding to mobile apps, I bring your vision to life with precision.
+                </p>
+                <div class="flex flex-wrap justify-center lg:justify-start gap-4">
+                    <a href="#portfolio" class="px-6 md:px-8 py-3 md:py-4 bg-purple-600 rounded-2xl font-bold shadow-[0_10px_30px_rgba(126,34,206,0.4)] hover:shadow-purple-600/60 transition-all transform hover:-translate-y-1 text-sm md:text-base">View My Work</a>
+                    <a href="#contact" class="px-6 md:px-8 py-3 md:py-4 bg-white/5 border border-white/10 rounded-2xl font-bold hover:bg-white/10 transition-all text-sm md:text-base">Get in Touch</a>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- Services Section -->
+    <section id="services" class="py-20 md:py-32 bg-slate-900/20 relative">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="text-center mb-16 md:mb-20 scroll-reveal">
+                <h2 class="text-xs font-bold text-purple-500 uppercase tracking-[0.3em] mb-4">Core Expertise</h2>
+                <h3 class="text-3xl md:text-5xl font-bold">Comprehensive Design Services</h3>
+            </div>
+
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
+                <!-- Graphic Design -->
+                <div class="glow-box p-8 md:p-10 rounded-3xl scroll-reveal">
+                    <div class="mb-6 text-purple-400">
+                        <svg class="w-8 h-8 md:w-10 md:h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                    </div>
+                    <h4 class="text-xl font-bold mb-3">Graphic Design</h4>
+                    <p class="text-slate-500 text-sm leading-relaxed">Branding systems, visual identities, and professional print/digital marketing assets.</p>
+                </div>
+
+                <!-- Web & Mobile -->
+                <div class="glow-box p-8 md:p-10 rounded-3xl scroll-reveal">
+                    <div class="mb-6 text-purple-400">
+                        <svg class="w-8 h-8 md:w-10 md:h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
+                    </div>
+                    <h4 class="text-xl font-bold mb-3">Web & Mobile Apps</h4>
+                    <p class="text-slate-500 text-sm leading-relaxed">Modern web development and Android applications built for speed and reliability.</p>
+                </div>
+
+                <!-- UI/UX Design -->
+                <div class="glow-box p-8 md:p-10 rounded-3xl scroll-reveal">
+                    <div class="mb-6 text-purple-400">
+                        <svg class="w-8 h-8 md:w-10 md:h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+                    </div>
+                    <h4 class="text-xl font-bold mb-3">UI/UX Design</h4>
+                    <p class="text-slate-500 text-sm leading-relaxed">Designing user-centric flows and interactive prototypes optimized for conversion.</p>
+                </div>
+
+                <!-- Video Editing -->
+                <div class="glow-box p-8 md:p-10 rounded-3xl scroll-reveal">
+                    <div class="mb-6 text-purple-400">
+                        <svg class="w-8 h-8 md:w-10 md:h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 4v16M17 4v16M3 8h4m10 0h4M3 12h18M3 16h4m10 0h4M4 20h16a1 1 0 001-1V5a1 1 0 00-1-1H4a1 1 0 00-1 1v14a1 1 0 001 1z"/></svg>
+                    </div>
+                    <h4 class="text-xl font-bold mb-3">Video Editing</h4>
+                    <p class="text-slate-500 text-sm leading-relaxed">Cinematic editing, color correction, and audio post-production for all platforms.</p>
+                </div>
+
+                <!-- Motion Graphics -->
+                <div class="glow-box p-8 md:p-10 rounded-3xl scroll-reveal">
+                    <div class="mb-6 text-purple-400">
+                        <svg class="w-8 h-8 md:w-10 md:h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122"/></svg>
+                    </div>
+                    <h4 class="text-xl font-bold mb-3">Motion Graphics</h4>
+                    <p class="text-slate-500 text-sm leading-relaxed">Engaging animations and kinetic typography that add life to your content.</p>
+                </div>
+
+                <!-- Creative Strategy -->
+                <div class="glow-box p-8 md:p-10 rounded-3xl scroll-reveal">
+                    <div class="mb-6 text-purple-400">
+                        <svg class="w-8 h-8 md:w-10 md:h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                    </div>
+                    <h4 class="text-xl font-bold mb-3">Innovation</h4>
+                    <p class="text-slate-500 text-sm leading-relaxed">Strategic planning for cross-media campaigns involving design, video, and code.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Portfolio Grid -->
+    <section id="portfolio" class="py-20 md:py-32 px-6">
+        <div class="max-w-7xl mx-auto">
+            <div class="flex flex-col md:flex-row justify-between items-center md:items-end mb-12 md:mb-16 gap-6 scroll-reveal text-center md:text-left">
+                <div>
+                    <h2 class="text-xs font-bold text-purple-500 uppercase tracking-[0.3em] mb-4">Portfolio</h2>
+                    <h3 class="text-3xl md:text-5xl font-bold italic uppercase">Latest Creations</h3>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
+                <!-- Project 1 -->
+                <div class="group relative overflow-hidden rounded-[2rem] md:rounded-[2.5rem] bg-slate-900 aspect-video glow-box scroll-reveal">
+                    <img src="https://via.placeholder.com/1200x800/2e1065/ffffff?text=App+Design+Showcase" class="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105 opacity-60">
+                    <div class="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent p-6 md:p-10 flex flex-col justify-end">
+                        <span class="text-purple-400 font-bold uppercase tracking-widest text-[10px] mb-2">Mobile App & UI/UX</span>
+                        <h4 class="text-xl md:text-2xl font-bold mb-2">FinTech App Ecosystem</h4>
+                        <p class="text-slate-400 text-xs md:text-sm max-w-sm">A complete mobile application design with integrated motion flows.</p>
+                    </div>
+                </div>
+                <!-- Project 2 -->
+                <div class="group relative overflow-hidden rounded-[2rem] md:rounded-[2.5rem] bg-slate-900 aspect-video glow-box scroll-reveal">
+                    <img src="https://via.placeholder.com/1200x800/4c1d95/ffffff?text=Motion+Graphics+Reel" class="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105 opacity-60">
+                    <div class="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent p-6 md:p-10 flex flex-col justify-end">
+                        <span class="text-purple-400 font-bold uppercase tracking-widest text-[10px] mb-2">Motion Graphics</span>
+                        <h4 class="text-xl md:text-2xl font-bold mb-2">2024 Brand Reveal</h4>
+                        <p class="text-slate-400 text-xs md:text-sm max-w-sm">High-energy 3D logo reveal and motion brand identity.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Certification Section -->
+    <section class="py-20 md:py-32 px-6">
+        <div class="max-w-7xl mx-auto">
+            <div class="mb-12 md:mb-16 scroll-reveal text-center md:text-left">
+                <h2 class="text-xs font-bold text-purple-500 uppercase tracking-[0.3em] mb-4">Credentials</h2>
+                <h3 class="text-3xl md:text-5xl font-bold uppercase">Certifications</h3>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                <!-- Cert 1 -->
+                <div class="p-4 rounded-3xl border border-white/5 bg-white/5 glow-box scroll-reveal flex flex-col">
+                    <div class="cert-container mb-6">
+                        <img src="https://via.placeholder.com/600x450/7e22ce/ffffff?text=Adobe+Certificate" alt="Adobe Certificate" class="grayscale hover:grayscale-0 transition-all">
+                    </div>
+                    <div class="px-2 pb-2">
+                        <h4 class="font-bold mb-1 uppercase tracking-wide text-sm">Adobe Certified</h4>
+                        <p class="text-[10px] text-slate-500 mb-2 uppercase">Visual Communication</p>
+                        <p class="text-[9px] text-purple-400 font-bold uppercase">ID: #883921</p>
+                    </div>
+                </div>
+                <!-- Cert 2 -->
+                <div class="p-4 rounded-3xl border border-white/5 bg-white/5 glow-box scroll-reveal flex flex-col">
+                    <div class="cert-container mb-6">
+                        <img src="Img/My cert.jpg" alt="Video Editing Certificate" class="grayscale hover:grayscale-0 transition-all">
+                    </div>
+                    <div class="px-2 pb-2">
+                        <h4 class="font-bold mb-1 uppercase tracking-wide text-sm">Video Editing</h4>
+                        <p class="text-[10px] text-slate-500 mb-2 uppercase">DaVinci Professional</p>
+                        <p class="text-[9px] text-purple-400 font-bold uppercase">Issued: 2024</p>
+                    </div>
+                </div>
+                <!-- Cert 3 -->
+                <div class="p-4 rounded-3xl border border-white/5 bg-white/5 glow-box scroll-reveal flex flex-col">
+                    <div class="cert-container mb-6">
+                        <img src="https://via.placeholder.com/600x450/7e22ce/ffffff?text=Google+UX+Certificate" alt="Google UX Certificate" class="grayscale hover:grayscale-0 transition-all">
+                    </div>
+                    <div class="px-2 pb-2">
+                        <h4 class="font-bold mb-1 uppercase tracking-wide text-sm">UI/UX Google</h4>
+                        <p class="text-[10px] text-slate-500 mb-2 uppercase">Design Specialization</p>
+                        <p class="text-[9px] text-purple-400 font-bold uppercase">Verified</p>
+                    </div>
+                </div>
+                <!-- Cert 4 -->
+                <div class="p-4 rounded-3xl border border-white/5 bg-white/5 glow-box scroll-reveal flex flex-col">
+                    <div class="cert-container mb-6">
+                        <img src="https://via.placeholder.com/600x450/7e22ce/ffffff?text=Android+Dev+Certificate" alt="Android Dev Certificate" class="grayscale hover:grayscale-0 transition-all">
+                    </div>
+                    <div class="px-2 pb-2">
+                        <h4 class="font-bold mb-1 uppercase tracking-wide text-sm">Android Dev</h4>
+                        <p class="text-[10px] text-slate-500 mb-2 uppercase">Mobile Apps</p>
+                        <p class="text-[9px] text-purple-400 font-bold uppercase">Issued: 2024</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonials Section -->
+    <section class="py-20 md:py-32 bg-slate-900/30">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="text-center mb-16 md:mb-20 scroll-reveal">
+                <h2 class="text-xs font-bold text-purple-500 uppercase tracking-[0.3em] mb-4">Kind Words</h2>
+                <h3 class="text-3xl md:text-5xl font-bold uppercase italic">Client Feedbacks</h3>
+            </div>
+            <div class="grid md:grid-cols-3 gap-6 md:gap-8">
+                <!-- Testimonial 1 -->
+                <div class="testimonial-card p-8 md:p-10 rounded-[2.5rem] md:rounded-[3rem] border border-white/5 scroll-reveal">
+                    <div class="text-purple-400 mb-6 text-4xl font-serif">“</div>
+                    <p class="text-slate-300 italic mb-8 leading-relaxed text-sm md:text-base">Birhaneyesus delivered a brand identity that perfectly captures our essence. His motion design work is simply breathtaking.</p>
+                    <div class="flex items-center gap-4">
+                        <div class="w-10 h-10 md:w-12 md:h-12 rounded-full bg-purple-600/50 flex items-center justify-center font-bold text-xs md:text-sm">JD</div>
+                        <div>
+                            <h5 class="font-bold text-xs md:text-sm">James D.</h5>
+                            <p class="text-[9px] text-purple-400 uppercase font-bold">Visionary Tech</p>
+                        </div>
+                    </div>
+                </div>
+                <!-- Testimonial 2 -->
+                <div class="testimonial-card p-8 md:p-10 rounded-[2.5rem] md:rounded-[3rem] border border-white/5 scroll-reveal">
+                    <div class="text-purple-400 mb-6 text-4xl font-serif">“</div>
+                    <p class="text-slate-300 italic mb-8 leading-relaxed text-sm md:text-base">Professional, fast, and incredibly creative. The video editing was flawless and delivered exactly what we needed.</p>
+                    <div class="flex items-center gap-4">
+                        <div class="w-10 h-10 md:w-12 md:h-12 rounded-full bg-indigo-600/50 flex items-center justify-center font-bold text-xs md:text-sm">SA</div>
+                        <div>
+                            <h5 class="font-bold text-xs md:text-sm">Sarah A.</h5>
+                            <p class="text-[9px] text-purple-400 uppercase font-bold">Creative Director</p>
+                        </div>
+                    </div>
+                </div>
+                <!-- Testimonial 3 -->
+                <div class="testimonial-card p-8 md:p-10 rounded-[2.5rem] md:rounded-[3rem] border border-white/5 scroll-reveal">
+                    <div class="text-purple-400 mb-6 text-4xl font-serif">“</div>
+                    <p class="text-slate-300 italic mb-8 leading-relaxed text-sm md:text-base">A rare talent that understands both the aesthetics of design and the logic of development. Exceptional work.</p>
+                    <div class="flex items-center gap-4">
+                        <div class="w-10 h-10 md:w-12 md:h-12 rounded-full bg-pink-600/50 flex items-center justify-center font-bold text-xs md:text-sm">RK</div>
+                        <div>
+                            <h5 class="font-bold text-xs md:text-sm">Robert K.</h5>
+                            <p class="text-[9px] text-purple-400 uppercase font-bold">Founder, AppStream</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section id="contact" class="py-20 md:py-32 px-6 relative overflow-hidden">
+        <div class="max-w-7xl mx-auto grid lg:grid-cols-2 gap-12 md:gap-16 relative z-10">
+            <div class="scroll-reveal text-center lg:text-left">
+                <h2 class="text-xs font-bold text-purple-500 uppercase tracking-[0.3em] mb-4">Contact</h2>
+                <h3 class="text-4xl md:text-7xl font-extrabold mb-8 md:mb-10 gradient-text">Work With Me.</h3>
+                <p class="text-lg md:text-xl text-slate-400 mb-10 md:mb-12">Have a project in mind? Let's build something extraordinary together.</p>
+                
+                <div class="space-y-4 md:space-y-6 max-w-md mx-auto lg:mx-0">
+                    <div class="p-5 md:p-6 bg-white/5 border border-white/10 rounded-3xl glow-box flex items-center gap-4 md:gap-6">
+                        <div class="w-10 h-10 md:w-12 md:h-12 bg-purple-600/20 rounded-2xl flex items-center justify-center text-purple-400">
+                            <svg class="w-5 h-5 md:w-6 md:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/></svg>
+                        </div>
+                        <div class="text-left">
+                            <p class="text-[9px] md:text-xs font-bold text-purple-400 uppercase tracking-widest">Call / WhatsApp</p>
+                            <p class="text-lg md:text-xl font-bold">+251 916 09 0427</p>
+                        </div>
+                    </div>
+                    <div class="p-5 md:p-6 bg-white/5 border border-white/10 rounded-3xl glow-box flex items-center gap-4 md:gap-6">
+                        <div class="w-10 h-10 md:w-12 md:h-12 bg-purple-600/20 rounded-2xl flex items-center justify-center text-purple-400">
+                            <svg class="w-5 h-5 md:w-6 md:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                        </div>
+                        <div class="text-left">
+                            <p class="text-[9px] md:text-xs font-bold text-purple-400 uppercase tracking-widest">Instagram</p>
+                            <p class="text-lg md:text-xl font-bold">@birhaneyesus16</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="scroll-reveal bg-white/5 p-8 md:p-12 rounded-[2.5rem] md:rounded-[3rem] border border-white/10 backdrop-blur-sm">
+                <!-- Form updated with Formspree action and name attributes -->
+                <form id="contact-form" action="https://formspree.io/f/xlglwpgg" method="POST" class="space-y-6">
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Your Name</label>
+                            <input type="text" name="name" required placeholder="John Doe" class="w-full px-6 py-4 rounded-2xl text-white text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Your Email</label>
+                            <input type="email" name="email" required placeholder="john@example.com" class="w-full px-6 py-4 rounded-2xl text-white text-sm">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Subject</label>
+                        <input type="text" name="subject" placeholder="Project Inquiry" class="w-full px-6 py-4 rounded-2xl text-white text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Message</label>
+                        <textarea name="message" required rows="4" placeholder="Tell me about your vision..." class="w-full px-6 py-4 rounded-2xl text-white resize-none text-sm"></textarea>
+                    </div>
+                    <button type="submit" class="w-full py-4 md:py-5 bg-purple-600 rounded-2xl font-bold text-white shadow-xl shadow-purple-900/40 hover:bg-purple-500 transition-all flex items-center justify-center gap-3 text-sm md:text-base">
+                        Send Message
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                    </button>
+                </form>
+            </div>
+        </div>
+        
+        <footer class="max-w-7xl mx-auto mt-20 md:mt-32 pt-20 border-t border-white/10 flex flex-col md:flex-row justify-between items-center gap-8 pb-10">
+            <div class="flex items-center gap-3">
+                <div class="w-8 h-8 bg-purple-600 rounded-lg flex items-center justify-center font-bold text-white text-xs">BA</div>
+                <span class="text-sm font-bold tracking-tight uppercase">Bis Design</span>
+            </div>
+            <p class="text-slate-500 text-[9px] md:text-[10px] tracking-[0.3em] uppercase text-center">
+                &copy; <span id="copyright-year"></span> Birhaneyesus Alemayehu. Visual Excellence.
+            </p>
+        </footer>
+    </section>
+
+    <script>
+        // Set copyright year
+        document.getElementById('copyright-year').textContent = new Date().getFullYear();
+
+        // 1. WebGL Particles Background
+        const canvas = document.querySelector('#canvas-webgl');
+        const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        camera.position.z = 5;
+
+        let particles;
+        function initBackground() {
+            const geometry = new THREE.BufferGeometry();
+            const vertices = [];
+            for (let i = 0; i < 2000; i++) {
+                vertices.push(THREE.MathUtils.randFloatSpread(20));
+                vertices.push(THREE.MathUtils.randFloatSpread(20));
+                vertices.push(THREE.MathUtils.randFloatSpread(20));
+            }
+            geometry.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));
+            const material = new THREE.PointsMaterial({ color: 0x7e22ce, size: 0.04, transparent: true, opacity: 0.4 });
+            particles = new THREE.Points(geometry, material);
+            scene.add(particles);
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+            if(particles) particles.rotation.y += 0.0008;
+            renderer.render(scene, camera);
+        }
+
+        function handleResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+
+        window.addEventListener('resize', handleResize);
+        handleResize();
+        initBackground();
+        animate();
+
+        // 2. Custom Cursor
+        const cursor = document.querySelector('#cursor');
+        document.addEventListener('mousemove', (e) => {
+            gsap.to(cursor, {
+                x: e.clientX - 10,
+                y: e.clientY - 10,
+                duration: 0.1
+            });
+        });
+
+        // 3. Scroll Reveal Animations
+        gsap.registerPlugin(ScrollTrigger);
+        
+        const reveals = document.querySelectorAll('.scroll-reveal');
+        reveals.forEach((el) => {
+            gsap.to(el, {
+                scrollTrigger: {
+                    trigger: el,
+                    start: "top 85%",
+                    toggleActions: "play none none none"
+                },
+                opacity: 1,
+                y: 0,
+                duration: 1.2,
+                ease: "power4.out"
+            });
+        });
+
+        // Smooth Scroll
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                document.querySelector(this.getAttribute('href')).scrollIntoView({
+                    behavior: 'smooth'
+                });
+            });
+        });
+    </script>
+</body>
+</html>
